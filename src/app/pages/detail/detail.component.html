@@ -1,0 +1,38 @@
+<header>
+  <nav>
+    <h1>Olympic games app</h1>
+    <div class="button" (click)="onBack()">Back</div>
+  </nav>
+</header>
+<ng-container *ngIf="isCountryPresent">
+  <h2>Medals per Country</h2>
+  <div id="recapContainer">
+    <div class="recap">
+      <h3>Number of entries</h3>
+      <p>{{countryData.participations.length}}</p>
+    </div>
+    <div class="recap">
+      <h3>Total number medals</h3>
+      <p>{{totalMedals}}</p>
+    </div>
+    <div class="recap">
+      <h3>Total number of athletes</h3>
+      <p>{{totalAthletes}}</p>
+    </div>
+  </div>
+  <div class="chartContainer">
+    <canvas
+      baseChart
+      [data]="lineChartData"
+      [options]="lineChartOptions"
+      [type]="lineChartType"
+    ></canvas>
+  </div>
+</ng-container>
+<ng-container *ngIf="!isCountryPresent">
+  <div class="recap" id="error">
+    <h3>No data for country {{countryName}}.</h3>
+    <div class="button" (click)="onBack()">Back</div>
+  </div>
+</ng-container>
+
