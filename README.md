@@ -26,3 +26,7 @@ The predefined architecture includes (in addition to the default angular archite
 - `not-found` folder: contains the template and logic for the not-found page 
 - `delay-resolver` folder: contains the logic for the delay resolver DO NOT USE IN PRODUCTION 
 - `style.scss`: contains the global css of the app.
+
+## CodeStyle
+
+Method names are written in camelCase.

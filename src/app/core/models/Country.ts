@@ -2,7 +2,7 @@ import {Participation} from "./Participation";
 
 export interface Country {
   id : number,
-  country : string,
+  name : string,
   participations : Participation[]
 }
 

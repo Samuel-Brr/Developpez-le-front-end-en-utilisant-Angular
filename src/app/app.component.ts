@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { take } from 'rxjs';
+import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Subscription, take} from 'rxjs';
 import { OlympicService } from './core/services/olympic.service';
 import {NavigationCancel, NavigationEnd, NavigationError, NavigationStart, Router} from "@angular/router";
 
@@ -8,17 +8,24 @@ import {NavigationCancel, NavigationEnd, NavigationError, NavigationStart, Route
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
 })
-export class AppComponent implements OnInit {
-  constructor(private olympicService: OlympicService, private router: Router) {}
+export class AppComponent implements OnInit, OnDestroy{
   loading = false;
+  private subscription!: Subscription;
+
+  constructor(private olympicService: OlympicService, private router: Router) {}
+
 
   ngOnInit(): void {
     this.olympicService.loadInitialData().pipe(take(1)).subscribe();
     this.setLoadingScreen();
   }
 
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe()
+  }
+
   private setLoadingScreen() {
-    this.router.events.subscribe(event => {
+    this.subscription = this.router.events.subscribe(event => {
       if (event instanceof NavigationStart) {
         this.loading = true;
       } else if (

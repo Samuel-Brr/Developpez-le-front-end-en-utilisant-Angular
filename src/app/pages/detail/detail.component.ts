@@ -1,11 +1,11 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute, Router} from "@angular/router";
 import {OlympicService} from "../../core/services/olympic.service";
-import {filter, map} from "rxjs";
+import {map, Subscription} from "rxjs";
 import {AsyncPipe, JsonPipe, NgIf} from "@angular/common";
 import {Country} from "../../core/models/Country";
 import {BaseChartDirective} from "ng2-charts";
-import {ChartConfiguration, ChartType, LogarithmicScale} from "chart.js";
+import {ChartConfiguration, ChartType} from "chart.js";
 
 @Component({
   selector: 'app-detail',
@@ -19,7 +19,7 @@ import {ChartConfiguration, ChartType, LogarithmicScale} from "chart.js";
   templateUrl: './detail.component.html',
   styleUrl: './detail.component.scss'
 })
-export class DetailComponent implements OnInit {
+export class DetailComponent implements OnInit, OnDestroy {
   @ViewChild(BaseChartDirective) chart?: BaseChartDirective;
   lineChartType: ChartType = 'line';
   lineChartData!: ChartConfiguration['data'];
@@ -37,7 +37,7 @@ export class DetailComponent implements OnInit {
     },
 
     plugins: {
-      legend: { display: true },
+      legend: {display: true},
     },
   };
 
@@ -47,25 +47,31 @@ export class DetailComponent implements OnInit {
   totalAthletes!: number;
   isCountryPresent!: boolean;
 
+  private subscription!: Subscription;
+
   constructor(private route: ActivatedRoute, private olympicService: OlympicService, private router: Router) {
   }
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.setCountryName();
     this.initPageData();
   }
 
-  private initPageData() {
-    this.olympicService.getOlympics()
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
+  }
+
+  private initPageData(): void {
+    this.subscription = this.olympicService.getOlympics()
       .pipe(
         map(countries => {
           if (!!countries) {
-            let countryOptionnal = countries.filter(country => country.country == this.countryName);
-            if (countryOptionnal.length == 0) {
+            let countryOptionnal: Country | undefined = countries.find(country => country.name == this.countryName);
+            if (!countryOptionnal) {
               this.isCountryPresent = false
             } else {
               this.isCountryPresent = true
-              this.countryData = countries[0];
+              this.countryData = countryOptionnal;
               this.initLineChartData();
               this.initTotalMedals();
               this.initTotalAthletes();
@@ -76,19 +82,19 @@ export class DetailComponent implements OnInit {
       .subscribe()
   }
 
-  private setCountryName() {
+  private setCountryName(): void {
     this.route.params.subscribe(params => {
       this.countryName = params['countryName'];
     });
   }
 
-  private initLineChartData(){
+  private initLineChartData(): void {
     this.lineChartData = {
       datasets: [
         {
-          data:  this.countryData.participations.map(participation => participation.medalsCount),
+          data: this.countryData.participations.map(participation => participation.medalsCount),
           label: this.countryName,
-          backgroundColor: 'rgba(148,159,177,0.2)',
+          backgroundColor: 'rgba(255,255,255,0)',
           borderColor: 'rgba(148,159,177,1)',
           pointBackgroundColor: 'rgba(148,159,177,1)',
           pointBorderColor: '#fff',
@@ -101,19 +107,19 @@ export class DetailComponent implements OnInit {
     };
   }
 
-  private initTotalMedals(){
+  private initTotalMedals(): void {
     let medals = 0;
-    this.countryData.participations.forEach(participation =>  medals = medals + participation.medalsCount);
+    this.countryData.participations.forEach(participation => medals = medals + participation.medalsCount);
     this.totalMedals = medals;
   }
 
-  private initTotalAthletes(){
+  private initTotalAthletes(): void {
     let athletes = 0;
-    this.countryData.participations.forEach(participation =>  athletes = athletes + participation.athleteCount);
+    this.countryData.participations.forEach(participation => athletes = athletes + participation.athleteCount);
     this.totalAthletes = athletes;
   }
 
-  public onBack(){
+  public onBack(): void {
     this.router.navigate([""]);
   }
 }
