@@ -55,7 +55,7 @@ p{
 
 .chartContainer{
   margin: auto;
-  max-width: 500px;
+  max-width: 900px;
 }
 
 app-pie-chart{
@@ -113,3 +113,17 @@ canva{
   flex-direction: column;
   margin: auto;
 }
+
+.ngx-charts-tooltip-content {
+  background: #048E82 !important;
+  color: #ffffff !important;
+  padding: 10px !important;
+  border-radius: 5px !important;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1) !important;
+  font-size: 18px !important;
+}
+
+.tooltip-caret         {
+  border-top-color: #048E82 !important;
+}
+

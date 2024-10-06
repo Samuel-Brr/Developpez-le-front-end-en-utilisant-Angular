@@ -1,8 +1,9 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {map, Observable, of, Subscription} from 'rxjs';
 import {OlympicService} from 'src/app/core/services/olympic.service';
 import {Country} from "../../core/models/Country";
-import {ChartData} from "chart.js";
+import {Color, ScaleType} from "@swimlane/ngx-charts";
+import {Router} from "@angular/router";
 
 @Component({
   selector: 'app-home',
@@ -10,13 +11,25 @@ import {ChartData} from "chart.js";
   styleUrls: ['./home.component.scss'],
 })
 export class HomeComponent implements OnInit, OnDestroy {
-  public olympics$: Observable<Country[]> = of([]);
-  pieChartData!: ChartData<'pie', number[], string | string[]>;
+  @ViewChild('tooltipTemplate', { static: true }) tooltipTemplate!: ElementRef;
+  olympics$: Observable<Country[]> = of([]);
   numberOfJOs!: number;
-
   private subscription!: Subscription;
 
-  constructor(private olympicService: OlympicService) {
+  // Pie chart options
+  chartData!:{name: string, value: number}[];
+  gradient: boolean = true;
+  showLegend: boolean = false;
+  showLabels: boolean = true;
+  isDoughnut: boolean = false;
+  colorScheme: Color = {
+    name: "toto",
+    selectable: true,
+    group: ScaleType.Linear,
+    domain: ['#946065', '#b7cae6', '#88a0da','#783d52', '#967fa0']
+  };
+
+  constructor(private olympicService: OlympicService, private router: Router) {
   }
 
   ngOnInit(): void {
@@ -31,36 +44,32 @@ export class HomeComponent implements OnInit, OnDestroy {
   private initPieChart(): void {
     this.subscription = this.olympics$.pipe(
       map(countries => {
-        let labels: string[] = [];
-        let medals: number[] = [];
         if (!!countries) {
           this.numberOfJOs = countries[0].participations.length;
-          this.populateLabelsAndData(countries, labels, medals);
-          this.setPieChartData(labels, medals);
+          this.chartData = this.generateChartData(countries);
         }
       })
     ).subscribe()
   }
 
-  private populateLabelsAndData(countries: Country[], labels: string[], medals: number[]) {
+  private generateChartData(countries: Country[]) {
+    const newSingle:{name: string, value: number}[] = []
     countries.forEach(country => {
       let totalMedals: number = 0;
       country.participations.forEach(participation => totalMedals = totalMedals + participation.medalsCount)
-      labels.push(country.name);
-      medals.push(totalMedals)
+      newSingle.push({name: country.name, value: totalMedals})
     });
+    return newSingle;
   }
 
-  private setPieChartData(labels: string[], medals: number[]) {
-    this.pieChartData = {
-      labels,
-      datasets: [
-        {
-          data: medals,
-          backgroundColor: ['#048E82', '#3D048E', '#8E0410', '#558E04', '#888E04'],
-          hoverBackgroundColor: ['#05b8a8', '#713fb1', '#dc4652', '#a4f336', '#f7ff87']
-        }
-      ]
-    };
+  onSelect(data: {name: string, value: number, label: string}): void {
+    this.router.navigate(['detail', data.name])
+  }
+
+  formatTooltipText(data: any): string {
+    return `
+      <span class="tooltip-label">${data.data.name}</span>
+      <span class="tooltip-val"><img src="../../../assets/gold-medal_522484.png" width="15px">${data.value.toLocaleString()}</span>
+    `;
   }
 }

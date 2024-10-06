@@ -21,12 +21,18 @@
     </div>
   </div>
   <div class="chartContainer">
-    <canvas
-      baseChart
-      [data]="lineChartData"
-      [options]="lineChartOptions"
-      [type]="lineChartType"
-    ></canvas>
+    <ngx-charts-line-chart
+      [legend]="legend"
+      [showXAxisLabel]="showXAxisLabel"
+      [showYAxisLabel]="showYAxisLabel"
+      [xAxis]="xAxis"
+      [yAxis]="yAxis"
+      [xAxisLabel]="xAxisLabel"
+      [timeline]="timeline"
+      [results]="lineChartData"
+      [tooltipDisabled]="true"
+    >
+    </ngx-charts-line-chart>
   </div>
 </ng-container>
 <ng-container *ngIf="!isCountryPresent">

@@ -15,5 +15,17 @@
   </div>
 </div>
 <div class="chartContainer">
-  <app-pie-chart [pieChartData]="pieChartData"></app-pie-chart>
+  <ngx-charts-pie-chart
+    [results]="chartData"
+    [gradient]="gradient"
+    [legend]="showLegend"
+    [labels]="showLabels"
+    [doughnut]="isDoughnut"
+    [scheme]="colorScheme"
+    (select)="onSelect($event)"
+    [tooltipText]="formatTooltipText"
+  >
+  </ngx-charts-pie-chart>
 </div>
+
+<div #tooltipTemplate class="tooltip-container" style="display: none; position: fixed; pointer-events: none;"></div>

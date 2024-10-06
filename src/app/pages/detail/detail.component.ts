@@ -1,11 +1,11 @@
-import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from "@angular/router";
 import {OlympicService} from "../../core/services/olympic.service";
 import {map, Subscription} from "rxjs";
 import {AsyncPipe, JsonPipe, NgIf} from "@angular/common";
 import {Country} from "../../core/models/Country";
 import {BaseChartDirective} from "ng2-charts";
-import {ChartConfiguration, ChartType} from "chart.js";
+import {LineChartModule} from "@swimlane/ngx-charts";
 
 @Component({
   selector: 'app-detail',
@@ -14,32 +14,24 @@ import {ChartConfiguration, ChartType} from "chart.js";
     JsonPipe,
     BaseChartDirective,
     AsyncPipe,
-    NgIf
+    NgIf,
+    LineChartModule
   ],
   templateUrl: './detail.component.html',
   styleUrl: './detail.component.scss'
 })
 export class DetailComponent implements OnInit, OnDestroy {
-  @ViewChild(BaseChartDirective) chart?: BaseChartDirective;
-  lineChartType: ChartType = 'line';
-  lineChartData!: ChartConfiguration['data'];
-  lineChartOptions: ChartConfiguration['options'] = {
-    elements: {
-      line: {
-        tension: 0.5,
-      },
-    },
-    scales: {
-      // We use this empty structure as a placeholder for dynamic theming.
-      y: {
-        position: 'left',
-      },
-    },
 
-    plugins: {
-      legend: {display: true},
-    },
-  };
+  // Line chart options
+  lineChartData!: {name: string, series:{name: string, value: number}[]}[];
+  legend: boolean = false;
+  animations: boolean = true;
+  xAxis: boolean = true;
+  yAxis: boolean = true;
+  showYAxisLabel: boolean = true;
+  showXAxisLabel: boolean = true;
+  xAxisLabel: string = 'Dates';
+  timeline: boolean = true;
 
   countryName!: string;
   countryData!: Country;
@@ -89,22 +81,12 @@ export class DetailComponent implements OnInit, OnDestroy {
   }
 
   private initLineChartData(): void {
-    this.lineChartData = {
-      datasets: [
-        {
-          data: this.countryData.participations.map(participation => participation.medalsCount),
-          label: this.countryName,
-          backgroundColor: 'rgba(255,255,255,0)',
-          borderColor: 'rgba(148,159,177,1)',
-          pointBackgroundColor: 'rgba(148,159,177,1)',
-          pointBorderColor: '#fff',
-          pointHoverBackgroundColor: '#fff',
-          pointHoverBorderColor: 'rgba(148,159,177,0.8)',
-          fill: 'origin',
-        }
-      ],
-      labels: this.countryData.participations.map(participation => participation.year),
-    };
+    this.lineChartData = [{
+      name: this.countryName,
+      series: this.countryData.participations.map(participation => {
+        return {name: participation.year.toString(), value: participation.medalsCount}
+      })
+    }]
   }
 
   private initTotalMedals(): void {
